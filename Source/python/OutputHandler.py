@@ -24,7 +24,7 @@ def _formatStandings(data : dict, args) -> str:
         Formatted standings output
     """
 
-    Template_Row : str = "|{Position}| {Team}|{GP}|{Wins}|{Losses}|{Overtime}|{Points}|{Differential}|{Home}|{Away}|{Streak}|\n"
+    Template_Row : str = "|{Position}| {Team}|{GP}|{Wins}|{Losses}|{Overtime}|{Points}|{Differential}|{Home}|{Away}|{Streak}|"
     def formatTeamRow(team_data : dict, position_sort : str = "leagueSequence") -> str:
         return Template_Row.format(
             Position        = str(team_data[position_sort]).center(5),
@@ -56,54 +56,62 @@ def _formatStandings(data : dict, args) -> str:
     ReleventData : list[dict] = data["standings"]
     FilterType : str = args.type
 
+    Output : list[str] = []
+
     if FilterType == "division":
 
-        AtlanticHolder      : str = f"{ATLANTIC_HEADER}\n{BORDER}\n{INFO}\n{BORDER}\n"
-        MetropolitanHolder  : str = f"{METROPOLITAN_HEADER}\n{BORDER}\n{INFO}\n{BORDER}\n"
-        CentralHolder       : str = f"{CENTRAL_HEADER}\n{BORDER}\n{INFO}\n{BORDER}\n"
-        PacificHolder       : str = f"{PACIFIC_HOLDER}\n{BORDER}\n{INFO}\n{BORDER}\n"
+        DivisionRows : dict[str, list[str]] = {
+            "A" : [f"{ATLANTIC_HEADER}\n{BORDER}\n{INFO}\n{BORDER}"],
+            "M" : [f"{METROPOLITAN_HEADER}\n{BORDER}\n{INFO}\n{BORDER}"],
+            "C" : [f"{CENTRAL_HEADER}\n{BORDER}\n{INFO}\n{BORDER}"],
+            "P" : [f"{PACIFIC_HOLDER}\n{BORDER}\n{INFO}\n{BORDER}"]
+        }
 
         for team_data in ReleventData:
+
             Row : str = formatTeamRow(team_data, "divisionSequence")
+            Division : str = team_data["divisionAbbrev"]
 
-            Division = team_data["divisionAbbrev"]
+            DivisionRows[Division].append(Row)
 
-            if Division == "A":
-                AtlanticHolder += Row
-            elif Division == "M":
-                MetropolitanHolder += Row
-            elif Division == "C":
-                CentralHolder += Row
-            elif Division == "P":
-                PacificHolder += Row
-
-        return f"{BORDER}\n{AtlanticHolder}{BORDER}\n{MetropolitanHolder}{BORDER}\n{CentralHolder}{BORDER}\n{PacificHolder}{BORDER}"
+        Output +=  [
+            BORDER,
+            *DivisionRows["A"], BORDER,
+            *DivisionRows["M"], BORDER,
+            *DivisionRows["C"], BORDER,
+            *DivisionRows["P"], BORDER
+        ]
 
     elif FilterType == "conference":
 
-        EasternHolder = f"{EASTERN_HEADER}\n{BORDER}\n{INFO}\n{BORDER}\n"
-        WesternHolder = f"{WESTERN_HEADER}\n{BORDER}\n{INFO}\n{BORDER}\n"
+        ConferenceRows : dict[str, list[str]] = {
+            "E" : [f"{EASTERN_HEADER}\n{BORDER}\n{INFO}\n{BORDER}"],
+            "W" : [f"{WESTERN_HEADER}\n{BORDER}\n{INFO}\n{BORDER}"]
+        }
 
         for team_data in ReleventData:
+
             Row : str = formatTeamRow(team_data, "conferenceSequence")
+            Conference : str = team_data["conferenceAbbrev"]
 
-            Conference = team_data["conferenceAbbrev"]
+            ConferenceRows[Conference].append(Row)
 
-            if Conference == "E":
-                EasternHolder += Row
-            elif Conference == "W":
-                WesternHolder += Row
-
-        return f"{BORDER}\n{EasternHolder}{BORDER}\n{WesternHolder}{BORDER}"
+        Output += [
+            BORDER,
+            *ConferenceRows["E"], BORDER,
+            *ConferenceRows["W"], BORDER,
+        ]
 
     else:
 
-        LeagueHolder : str = f"{BORDER}\n{LEAGUE_HEADER}\n{BORDER}\n{INFO}\n{BORDER}\n"
+        Output.append(f"{BORDER}\n{LEAGUE_HEADER}\n{BORDER}\n{INFO}\n{BORDER}")
 
         for team_data in ReleventData:
-            LeagueHolder += formatTeamRow(team_data)
+            Output.append(formatTeamRow(team_data))
 
-        return f"{LeagueHolder}{BORDER}"
+        Output.append(BORDER)
+
+    return "\n".join(Output)
 
 def _formatScores(data : dict, args) -> str:
     """
@@ -113,7 +121,6 @@ def _formatScores(data : dict, args) -> str:
         Scores data. See sameples/scores.json for structure reference
 
     args : argparse.Namespace
-        
 
     return str
         Formatted scores output
@@ -122,7 +129,7 @@ def _formatScores(data : dict, args) -> str:
     ReleventData : list[dict] = data["games"]
     NumberOfGames : int = len(ReleventData) - 1
 
-    # FilterType : str = args.type
+    FilterType : str = args.type
 
     Output : list[str] = []
     GameIndex : int = 0
@@ -133,10 +140,10 @@ def _formatScores(data : dict, args) -> str:
 
         TimeL : str = datetime.strptime(GameL["startTimeUTC"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d %H:%M:%SUTC")
 
-        HomeTeamL : str = GameL["homeTeam"]["name"]["default"].ljust(24)
+        HomeTeamL : str = GameL["homeTeam"]["name"]["default"].ljust(25)
         HomeScoreL : str = str(GameL["homeTeam"].get("score","N/A")).center(3)
 
-        AwayTeamL : str = GameL["awayTeam"]["name"]["default"].ljust(24)
+        AwayTeamL : str = GameL["awayTeam"]["name"]["default"].ljust(25)
         AwayScoreL : str = str(GameL["awayTeam"].get("score","N/A")).center(3)
 
         if (GameIndex + 1) <= NumberOfGames:
@@ -144,27 +151,27 @@ def _formatScores(data : dict, args) -> str:
 
             TimeR = datetime.strptime(GameR["startTimeUTC"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d %H:%M:%SUTC")
 
-            HomeTeamR : str = GameR["homeTeam"]["name"]["default"].ljust(24)
+            HomeTeamR : str = GameR["homeTeam"]["name"]["default"].ljust(25)
             HomeScoreR : int = str(GameR["homeTeam"].get("score","N/A")).center(3)
 
-            AwayTeamR : str = GameR["awayTeam"]["name"]["default"].ljust(24)
+            AwayTeamR : str = GameR["awayTeam"]["name"]["default"].ljust(25)
             AwayScoreR : int = str(GameR["awayTeam"].get("score","N/A")).center(3)
 
-            Output.append(f"{TimeL}                                        {TimeR}")
+            Output.append(f"{TimeL}                                         {TimeR}")
             Output.append(f"{HomeTeamL}||{HomeScoreL}||                               {HomeTeamR}||{HomeScoreR}||")
-            Output.append(f"{AwayTeamL}||{AwayScoreL}||                               {AwayTeamR}||{AwayScoreR}||\n")
+            Output.append(f"{AwayTeamL}||{AwayScoreL}||                               {AwayTeamR}||{AwayScoreR}||")
+            Output.append("")
 
         else:
             Output.append(f"{TimeL}")
             Output.append(f"{HomeTeamL}||{HomeScoreL}||")
-            Output.append(f"{AwayTeamL}||{AwayScoreL}||\n")
+            Output.append(f"{AwayTeamL}||{AwayScoreL}||")
+            Output.append("")
 
         GameIndex += 2
 
+    Output.pop()
     return "\n".join(Output)
-
-
-
 
 
 FormatMapping : dict[str, callable] = {
@@ -187,7 +194,7 @@ def renderOutput(arguments, data : dict) -> None:
         print(data)
         return
 
-    Render : str = FormatMapping[arguments.data](data, arguments.type)
+    Render : str = FormatMapping[arguments.data](data, arguments)
 
     os.system('cls' if os.name == 'nt' else 'clear')
     print(Render)
