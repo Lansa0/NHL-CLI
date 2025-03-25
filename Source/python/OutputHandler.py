@@ -9,10 +9,10 @@ def _formatStandings(data : dict, args) -> str:
     """
     Formats standings data for output
 
-    data : dict
+    data -> dict
         Standings data. See samples/standings.json for structure reference
 
-    args : argparse.Namespace
+    args -> argparse.Namespace
         Given user input. Only using args.type from this to show what the 
         user wants to see.
         Valid type inputs:
@@ -20,7 +20,7 @@ def _formatStandings(data : dict, args) -> str:
         - conference
         - league (empty or non valid types defualt to this)
 
-    return str
+    return -> str
         Formatted standings output
     """
 
@@ -117,12 +117,12 @@ def _formatScores(data : dict, args) -> str:
     """
     Formats scores data
 
-    data : dict
+    data -> dict
         Scores data. See sameples/scores.json for structure reference
 
-    args : argparse.Namespace
+    args -> argparse.Namespace
 
-    return str
+    return -> str
         Formatted scores output
     """
 
@@ -135,7 +135,6 @@ def _formatScores(data : dict, args) -> str:
     GameIndex : int = 0
     while GameIndex <= NumberOfGames:
 
-        print(GameIndex,NumberOfGames)
         GameL : dict = ReleventData[GameIndex]
 
         TimeL : str = datetime.strptime(GameL["startTimeUTC"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d %H:%M:%SUTC")
@@ -147,7 +146,7 @@ def _formatScores(data : dict, args) -> str:
         AwayScoreL : str = str(GameL["awayTeam"].get("score","N/A")).center(3)
 
         if (GameIndex + 1) <= NumberOfGames:
-            GameR : dict = ReleventData[GameIndex]
+            GameR : dict = ReleventData[GameIndex + 1]
 
             TimeR = datetime.strptime(GameR["startTimeUTC"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d %H:%M:%SUTC")
 
@@ -183,10 +182,10 @@ def renderOutput(arguments, data : dict) -> None:
     """
     Formats and outputs the data onto the terminal
 
-    arguments : argparse.Namespace
+    arguments -> argparse.Namespace
         Given user arguements
 
-    data : dict
+    data -> dict
         Response data
     """
 
