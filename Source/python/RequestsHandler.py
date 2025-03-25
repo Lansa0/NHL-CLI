@@ -17,7 +17,8 @@ def _requestHandler(url : str) -> dict:
     return Response.json()
 
 RequestMappings : dict[str, callable] = {
-    "standings" : lambda date: _requestHandler(f"https://api-web.nhle.com/v1/standings/{date}"),
+    "standings" : lambda args: _requestHandler(f"https://api-web.nhle.com/v1/standings/{args.date}"),
+    "scores" : lambda args: _requestHandler(f"https://api-web.nhle.com/v1/score/{args.date}")
 }
 
 def getData(arguments) -> dict:
@@ -31,7 +32,4 @@ def getData(arguments) -> dict:
         JSON response of the requested data
     """
 
-    DataKey : str = arguments.data
-    Date : str = arguments.date
-
-    return RequestMappings[DataKey](Date)
+    return RequestMappings[arguments.data](arguments)

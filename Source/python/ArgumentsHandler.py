@@ -3,10 +3,10 @@ import datetime
 
 DataChoices : list[str] = [
     "standings",
-    # "stats"
+    "scores",
 ]
 
-def validateDate(date_input : str) -> str:
+def _validateDate(date_input : str) -> str:
     if date_input == "now":
         return "now"
     try:
@@ -28,14 +28,14 @@ def run() -> argparse.Namespace:
     Parser.add_argument(
         "-t",
         "--type",
-        type = str,
+        type = str.lower,
         help = "the specific way to view given data" # Write a better help section
     )
 
     Parser.add_argument(
         "-d",
         "--date",
-        type = validateDate,
+        type = _validateDate,
         default = "now",
         help = "specify date for certain NHL data (YYYY-MM-DD)"
     )
